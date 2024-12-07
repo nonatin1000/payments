@@ -1,5 +1,6 @@
 from typing import List
 from strategy.payment.interfaces.provider_interface import Provider
+import logging
 
 
 class MercadoPagoProvider(Provider):
@@ -13,12 +14,12 @@ class MercadoPagoProvider(Provider):
 
     def process_payment(self, payment_method: str, amount: float) -> bool:
         if payment_method not in self.supported_methods:
-            raise ValueError(f"Método {payment_method} não suportado por {self.name}.")
+            raise ValueError(f"Method {payment_method} not supported by {self.name}.")
 
-        print(
-            f"[{self.name}] Processando pagamento de R$ {amount:.2f} via {payment_method}."
+        logging.info(
+            f"[{self.name}] Processing payment of ${amount:.2f} via {payment_method}."
         )
-        # Simulando falha proposital para 'credit_card'
+        # Simulating intentional failure for 'credit_card'
         if payment_method == "credit_card":
-            raise Exception("Método credit não suportado por MercadoPago.")
+            raise Exception("Method credit_card not supported by MercadoPago.")
         return True

@@ -1,6 +1,7 @@
 from typing import List
 
 from strategy.payment.interfaces.payment_strategy import PaymentStrategy
+import logging
 
 
 class BoletoPayment(PaymentStrategy):
@@ -17,8 +18,8 @@ class BoletoPayment(PaymentStrategy):
         return self.provider.name
 
     def process_payment(self, payment_method: str, amount: float) -> bool:
-        print(
-            f"Iniciando pagamento Boleto de R$ {amount:.2f} com o provider {self.provider.name}."
+        logging.info(
+            f"Starting Boleto payment of R$ {amount:.2f} with provider {self.provider.name}."
         )
         return self.provider.process_payment(payment_method, amount)
 

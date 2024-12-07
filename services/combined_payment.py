@@ -1,3 +1,4 @@
+import logging
 from strategy.payment.interfaces.payment_strategy import PaymentStrategy
 from strategy.payment.services.fallback_processor import FallbackProcessor
 
@@ -8,32 +9,32 @@ class CombinedPayment(PaymentStrategy):
 
     def add_payment(self, payment_strategy: PaymentStrategy, proportion: float):
         """
-        Adiciona uma estratégia de pagamento.
+        Adds a payment strategy.
 
-        :param payment_strategy: Instância de PaymentStrategy.
-        :param proportion: Proporção do valor total para este pagamento.
+        :param payment_strategy: Instance of PaymentStrategy.
+        :param proportion: Proportion of the total amount for this payment.
         """
         if proportion < 0 or proportion > 1:
-            raise ValueError("Proporção deve estar entre 0 e 1.")
+            raise ValueError("Proportion must be between 0 and 1.")
         self.payments.append({"strategy": payment_strategy, "proportion": proportion})
 
     def pay(self, total_amount: float):
         """
-        Processa o pagamento usando as estratégias combinadas.
+        Processes the payment using the combined strategies.
 
-        :param total_amount: Valor total a ser pago.
+        :param total_amount: Total amount to be paid.
         """
         if not self.payments:
-            raise ValueError("Nenhuma estratégia de pagamento foi adicionada.")
+            raise ValueError("No payment strategy has been added.")
 
-        print(f"[INFO] Pagamento combinado de R$ {total_amount:,.2f} iniciado.")
+        logging.info(f"Combined payment of R$ {total_amount:,.2f} started.")
         pending_amount = total_amount
 
-        # Agrupa as estratégias por tipo de pagamento
+        # Group strategies by payment method
         strategies_by_method = self._group_strategies_by_method()
         fallback_processor = FallbackProcessor(strategies_by_method)
 
-        # Processa cada tipo de pagamento independentemente
+        # Process each payment method independently
         for payment in self.payments:
             if pending_amount <= 0:
                 break
@@ -42,28 +43,28 @@ class CombinedPayment(PaymentStrategy):
                 payment, total_amount, pending_amount
             )
 
-        # Processa saldo pendente com fallback por todos os métodos de pagamento
+        # Process pending balance with fallback across all payment methods
         if pending_amount > 0:
             result = fallback_processor.process(pending_amount)
             if result:
                 pending_amount = 0
 
-        # Verifica se o pagamento foi completado
+        # Check if the payment was completed
         if pending_amount > 0:
             self._handle_payment_failure(total_amount - pending_amount, total_amount)
         else:
-            print(
-                f"[INFO] Pagamento concluído com sucesso. Total pago: R$ {total_amount:,.2f}."
+            logging.info(
+                f"Payment successfully completed. Total paid: R$ {total_amount:,.2f}."
             )
 
     def _process_payment(self, payment, total_amount, pending_amount):
         """
-        Processa uma tentativa de pagamento.
+        Processes a payment attempt.
 
-        :param payment: Estratégia de pagamento configurada.
-        :param total_amount: Valor total a ser pago.
-        :param pending_amount: Valor ainda pendente.
-        :return: Valor pendente após a tentativa de pagamento.
+        :param payment: Configured payment strategy.
+        :param total_amount: Total amount to be paid.
+        :param pending_amount: Amount still pending.
+        :return: Pending amount after the payment attempt.
         """
         strategy = payment["strategy"]
         proportion = payment["proportion"]
@@ -73,37 +74,35 @@ class CombinedPayment(PaymentStrategy):
             return pending_amount
 
         try:
-            print(
-                f"[INFO] Tentando pagar R$ {amount_to_pay:,.2f} com {strategy.provider_name}."
+            logging.info(
+                f"Attempting to pay R$ {amount_to_pay:,.2f} with {strategy.provider_name}."
             )
             strategy.pay(amount_to_pay)
-            print(f"[SUCCESS] R$ {amount_to_pay:,.2f} processados com sucesso.")
+            logging.info(f"R$ {amount_to_pay:,.2f} successfully processed.")
             return pending_amount - amount_to_pay
         except Exception as e:
-            print(
-                f"[ERROR] Falha ao processar R$ {amount_to_pay:,.2f} com {strategy.provider_name}: {e}"
+            logging.error(
+                f"Failed to process R$ {amount_to_pay:,.2f} with {strategy.provider_name}: {e}"
             )
             return pending_amount
 
     def _handle_payment_failure(self, total_paid, total_amount):
         """
-        Lida com falhas ao concluir o pagamento.
+        Handles failures to complete the payment.
 
-        :param total_paid: Valor já processado.
-        :param total_amount: Valor total esperado.
+        :param total_paid: Amount already processed.
+        :param total_amount: Total expected amount.
         """
-        print(
-            f"[ERROR] Não foi possível concluir o pagamento de R$ {total_amount:,.2f}."
-        )
-        print(
-            f"[CANCEL] Revertendo transações realizadas. Total a ser estornado: R$ {total_paid:,.2f}."
+        logging.error(f"Could not complete the payment of R$ {total_amount:,.2f}.")
+        logging.error(
+            f"Reverting completed transactions. Total to be refunded: R$ {total_paid:,.2f}."
         )
 
     def _group_strategies_by_method(self):
         """
-        Agrupa estratégias por tipo de pagamento.
+        Groups strategies by payment method.
 
-        :return: Dicionário com tipos de pagamento como chave e estratégias como valor.
+        :return: Dictionary with payment methods as keys and strategies as values.
         """
         grouped = {}
         for payment in self.payments:

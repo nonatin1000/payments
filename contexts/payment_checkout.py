@@ -1,4 +1,5 @@
 from strategy.payment.interfaces.payment_strategy import PaymentStrategy
+import logging
 
 
 class Checkout:
@@ -7,13 +8,13 @@ class Checkout:
 
     def set_strategy(self, strategy: PaymentStrategy):
         """
-        Define a estratégia de pagamento.
+        Sets the payment strategy.
         """
         self._strategy = strategy
 
     def pay(self, amount: float):
         """
-        Executa o pagamento usando a estratégia selecionada.
+        Executes the payment using the selected strategy.
         """
-        print(f"[INFO] Iniciando pagamento de R$ {amount:,.2f}.")
+        logging.info(f"Starting payment of ${amount:,.2f}.")
         self._strategy.pay(amount)

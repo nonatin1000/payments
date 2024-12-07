@@ -1,5 +1,6 @@
 from typing import List, Optional
 from strategy.payment.interfaces.provider_interface import Provider
+import logging
 
 
 class PaymentProcessor:
@@ -8,20 +9,20 @@ class PaymentProcessor:
 
     def process(self, amount: float, method: str) -> Optional[str]:
         """
-        Processa o pagamento com fallback entre os providers disponíveis.
-        Retorna o nome do provider que aprovou o pagamento ou None se todos falharem.
+        Processes the payment with fallback among the available providers.
+        Returns the name of the provider that approved the payment or None if all fail.
         """
-        print(
-            f"[INFO] Iniciando processamento com fallback. Valor: R$ {amount:,.2f}, Método: {method}"
+        logging.info(
+            f"Starting processing with fallback. Amount: R$ {amount:,.2f}, Method: {method}"
         )
         for provider in self.providers:
             if method in provider.supported_methods:
-                print(f"[INFO] Tentando processar com o provedor: {provider.name}...")
+                logging.info(f"Trying to process with provider: {provider.name}...")
                 try:
                     if provider.process_payment(method, amount):
-                        print(f"[SUCCESS] Pagamento aprovado por {provider.name}.")
+                        logging.info(f"Payment approved by {provider.name}.")
                         return provider.name
                 except Exception as e:
-                    print(f"[ERROR] Erro ao processar com {provider.name}: {e}")
-        print("[ERROR] Nenhum provedor conseguiu processar o pagamento.")
+                    logging.error(f"Error processing with {provider.name}: {e}")
+        logging.error("No provider was able to process the payment.")
         return None

@@ -12,14 +12,14 @@ class PaymentStrategy(Provider):
 
     @property
     def supported_methods(self) -> List[str]:
-        raise NotImplementedError("Este método deve ser implementado pelas subclasses.")
+        raise NotImplementedError("This method must be implemented by subclasses.")
 
-    def process_payment(self, payment_method: str, amount: float) -> bool:
-        raise NotImplementedError("Este método deve ser implementado pelas subclasses.")
+    def process_payment(self, method: str, amount: float) -> bool:
+        raise NotImplementedError("This method must be implemented by subclasses.")
 
     @property
     def payment_method(self) -> str:
-        raise NotImplementedError("Este método deve ser implementado pelas subclasses.")
+        raise NotImplementedError("This method must be implemented by subclasses.")
 
     def pay(self, amount: float):
-        raise NotImplementedError("Este método deve ser implementado pelas subclasses.")
+        raise NotImplementedError("This method must be implemented by subclasses.")

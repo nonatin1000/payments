@@ -7,7 +7,7 @@ class Provider(ABC):
     @abstractmethod
     def name(self) -> str:
         """
-        Nome do provedor (ex.: PagSeguro, MercadoPago).
+        Provider name (e.g., PagSeguro, MercadoPago).
         """
         pass
 
@@ -15,17 +15,17 @@ class Provider(ABC):
     @abstractmethod
     def supported_methods(self) -> List[str]:
         """
-        Lista de métodos de pagamento suportados (ex.: ['pix', 'credit_card']).
+        List of supported payment methods (e.g., ['pix', 'credit_card']).
         """
         pass
 
     @abstractmethod
     def process_payment(self, method: str, amount: float) -> bool:
         """
-        Processa o pagamento usando o método e o valor especificados.
+        Processes the payment using the specified method and amount.
 
-        :param method: Método de pagamento (ex.: 'pix').
-        :param amount: Valor do pagamento.
-        :return: True se o pagamento foi bem-sucedido, False caso contrário.
+        :param method: Payment method (e.g., 'pix').
+        :param amount: Payment amount.
+        :return: True if the payment was successful, False otherwise.
         """
         pass

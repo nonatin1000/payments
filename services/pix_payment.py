@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from strategy.payment.interfaces.payment_strategy import PaymentStrategy
@@ -17,8 +18,8 @@ class PixPayment(PaymentStrategy):
         return self.provider.name
 
     def process_payment(self, payment_method: str, amount: float) -> bool:
-        print(
-            f"Iniciando pagamento Pix de R$ {amount:.2f} com o provider {self.provider.name}."
+        logging.info(
+            f"Starting Pix payment of R$ {amount:.2f} with provider {self.provider.name}."
         )
         return self.provider.process_payment(payment_method, amount)
 

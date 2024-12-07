@@ -1,5 +1,6 @@
 from typing import List
 from strategy.payment.interfaces.payment_strategy import PaymentStrategy
+import logging
 
 
 class CreditCardPayment(PaymentStrategy):
@@ -16,8 +17,8 @@ class CreditCardPayment(PaymentStrategy):
         return self.provider.name
 
     def process_payment(self, payment_method: str, amount: float) -> bool:
-        print(
-            f"Iniciando pagamento Cartão de Crédito de R$ {amount:.2f} com o provider {self.provider.name}."
+        logging.info(
+            f"Starting credit card payment of R$ {amount:.2f} with provider {self.provider.name}."
         )
         return self.provider.process_payment(payment_method, amount)
 

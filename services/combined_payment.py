@@ -1,6 +1,6 @@
 import logging
-from strategy.payment.interfaces.payment_strategy import PaymentStrategy
-from strategy.payment.services.fallback_processor import FallbackProcessor
+from interfaces.payment_strategy import PaymentStrategy
+from services.fallback_processor import FallbackProcessor
 
 
 class CombinedPayment(PaymentStrategy):

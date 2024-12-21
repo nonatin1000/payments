@@ -2,11 +2,11 @@ import sys
 import os
 import logging
 from typing import List
-from strategy.payment.interfaces.provider_interface import Provider
-from strategy.payment.services.boleto_payment import BoletoPayment
-from strategy.payment.services.combined_payment import CombinedPayment
-from strategy.payment.services.credit_card_payment import CreditCardPayment
-from strategy.payment.services.pix_payment import PixPayment
+from interfaces.provider_interface import Provider
+from services.boleto_payment import BoletoPayment
+from services.combined_payment import CombinedPayment
+from services.credit_card_payment import CreditCardPayment
+from services.pix_payment import PixPayment
 
 logging.basicConfig(level=logging.INFO)
 

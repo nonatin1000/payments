@@ -1,5 +1,5 @@
 from typing import List
-from strategy.payment.interfaces.payment_strategy import PaymentStrategy
+from interfaces.payment_strategy import PaymentStrategy
 import logging
 
 

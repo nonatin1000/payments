@@ -38,54 +38,121 @@ O projeto "Gestão de Múltiplos Provedores de Pagamento" visa criar um sistema 
 ## Exemplos de Cenários de Pagamento
 
 ### Cenário 1: Sucesso com PIX
-
-```python
-# Configuração de pagamento apenas com PIX
+```
 pix_pagseguro = PixPayment(pagseguro)
 combined_payment = CombinedPayment()
 combined_payment.add_payment(pix_pagseguro, proportion=1.0)
 combined_payment.pay(total_amount=300.00)
-
-# Configuração de pagamento com fallback de cartão de crédito
-cartao_mercado_pago = CreditCardPayment(mercado_pago_fail)
-cartao_pagarme = CreditCardPayment(pagarme_success)
+```
+### Cenário 2: Falha no Cartão de Crédito com fallback para PagarMe
+```
+cartao_mercado_pago = CreditCardPayment(mercado_pago)
+cartao_pagarme = CreditCardPayment(pagarme)
 combined_payment = CombinedPayment()
 combined_payment.add_payment(cartao_mercado_pago, proportion=1.0)
 combined_payment.add_payment(cartao_pagarme, proportion=0.0)
 combined_payment.pay(total_amount=300.00)
+```
 
-# Configuração de pagamento com fallback de boleto
-boleto_pagseguro = BoletoPayment(pagseguro_boleto_fail)
-boleto_pagarme = BoletoPayment(pagarme_success)
+### Cenário 3: Falha no Boleto com fallback para PagarMe
+```
+boleto_pagseguro = BoletoPayment(pagseguro)
+boleto_pagarme = BoletoPayment(pagarme)
 combined_payment = CombinedPayment()
 combined_payment.add_payment(boleto_pagseguro, proportion=1.0)
 combined_payment.add_payment(boleto_pagarme, proportion=0.0)
 combined_payment.pay(total_amount=300.00)
+```
 
-# Configuração de pagamento com fallback de PIX
+### Cenário 4: Falha no PIX com fallback para PagarMe
+```
 pix_pagseguro = PixPayment(pagseguro)
-pix_pagarme = PixPayment(pagarme_pix_success)
+pix_pagarme = PixPayment(pagarme)
 combined_payment = CombinedPayment()
 combined_payment.add_payment(pix_pagseguro, proportion=1.0)
 combined_payment.add_payment(pix_pagarme, proportion=0.0)
 combined_payment.pay(total_amount=300.00)
+```
 
-# Configuração de pagamento com PIX e dois cartões de crédito
+### Cenário 5: PIX e dois cartões de crédito, com um cartão falhando
+```
 pix_pagseguro = PixPayment(pagseguro)
-cartao_mercado_pago = CreditCardPayment(mercado_pago_fail)
-cartao_pagarme = CreditCardPayment(pagarme_success)
+cartao_mercado_pago = CreditCardPayment(mercado_pago)
+cartao_pagarme = CreditCardPayment(pagarme)
 combined_payment = CombinedPayment()
 combined_payment.add_payment(pix_pagseguro, proportion=0.5)
 combined_payment.add_payment(cartao_mercado_pago, proportion=0.25)
 combined_payment.add_payment(cartao_pagarme, proportion=0.25)
 combined_payment.pay(total_amount=300.00)
+```
 
-# Configuração de pagamento combinado com PIX, boleto e crédito
+### Cenário 6: Pagamento combinado com PIX, boleto e crédito
+```
 pix_pagseguro = PixPayment(pagseguro)
-boleto_pagseguro = BoletoPayment(pagseguro_boleto_fail)
-cartao_pagarme = CreditCardPayment(pagarme_credit_fail)
+boleto_pagseguro = BoletoPayment(pagseguro)
+cartao_pagarme = CreditCardPayment(pagarme)
 combined_payment = CombinedPayment()
 combined_payment.add_payment(pix_pagseguro, proportion=0.4)
 combined_payment.add_payment(boleto_pagseguro, proportion=0.4)
 combined_payment.add_payment(cartao_pagarme, proportion=0.2)
 combined_payment.pay(total_amount=300.00)
+```
+
+### Cenário 7: Múltiplos fallbacks para PIX
+```
+pix_pagseguro = PixPayment(pagseguro)
+pix_pagarme = PixPayment(pagarme)
+combined_payment = CombinedPayment()
+combined_payment.add_payment(pix_pagseguro, proportion=0.5)
+combined_payment.add_payment(pix_pagarme, proportion=0.5)
+combined_payment.pay(total_amount=300.00)
+```
+
+### Cenário 8: Múltiplos fallbacks para Cartão de Crédito
+```
+cartao_mercado_pago = CreditCardPayment(mercado_pago)
+cartao_pagarme = CreditCardPayment(pagarme)
+combined_payment = CombinedPayment()
+combined_payment.add_payment(cartao_mercado_pago, proportion=0.5)
+combined_payment.add_payment(cartao_pagarme, proportion=0.5)
+combined_payment.pay(total_amount=300.00)
+```
+
+### Cenário 9: Múltiplos fallbacks para Boleto
+```
+boleto_pagseguro = BoletoPayment(pagseguro)
+boleto_pagarme = BoletoPayment(pagarme)
+combined_payment = CombinedPayment()
+combined_payment.add_payment(boleto_pagseguro, proportion=0.5)
+combined_payment.add_payment(boleto_pagarme, proportion=0.5)
+combined_payment.pay(total_amount=300.00)
+```
+### Cenário 10: Métodos de pagamento mistos com fallbacks
+```
+pix_pagseguro = PixPayment(pagseguro)
+boleto_pagseguro = BoletoPayment(pagseguro)
+cartao_mercado_pago = CreditCardPayment(mercado_pago)
+combined_payment = CombinedPayment()
+combined_payment.add_payment(pix_pagseguro, proportion=0.3)
+combined_payment.add_payment(boleto_pagseguro, proportion=0.3)
+combined_payment.add_payment(cartao_mercado_pago, proportion=0.4)
+combined_payment.pay(total_amount=300.00)
+```
+
+### Cenário 11: Todos os métodos com múltiplos fallbacks
+```
+pix_pagseguro = PixPayment(pagseguro)
+pix_pagarme = PixPayment(pagarme)
+boleto_pagseguro = BoletoPayment(pagseguro)
+boleto_pagarme = BoletoPayment(pagarme)
+cartao_mercado_pago = CreditCardPayment(mercado_pago)
+cartao_pagarme = CreditCardPayment(pagarme)
+combined_payment = CombinedPayment()
+combined_payment.add_payment(pix_pagseguro, proportion=0.2)
+combined_payment.add_payment(pix_pagarme, proportion=0.2)
+combined_payment.add_payment(boleto_pagseguro, proportion=0.2)
+combined_payment.add_payment(boleto_pagarme, proportion=0.2)
+combined_payment.add_payment(cartao_mercado_pago, proportion=0.1)
+combined_payment.add_payment(cartao_pagarme, proportion=0.1)
+combined_payment.pay(total_amount=300.00)
+```

@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional
-from interfaces.provider_interface import Provider
-from services.payment_processor import PaymentProcessor
+from contexts.payment_processor import PaymentProcessor
 from interfaces.payment_strategy import PaymentStrategy
 import logging
 

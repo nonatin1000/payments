@@ -1,8 +1,9 @@
-import sys
-import os
 import logging
 from typing import List
 from interfaces.provider_interface import Provider
+from providers.mercado_pago_provider import MercadoPagoProvider
+from providers.pagarme_provider import PagarMeProvider
+from providers.pagseguro_provider import PagSeguroProvider
 from services.boleto_payment import BoletoPayment
 from services.combined_payment import CombinedPayment
 from services.credit_card_payment import CreditCardPayment
@@ -11,68 +12,23 @@ from services.pix_payment import PixPayment
 logging.basicConfig(level=logging.INFO)
 
 
-class FakeProvider(Provider):
-    def __init__(
-        self, name: str, supported_methods: List[str], should_fail: bool = False
-    ):
-        self._name = name
-        self._supported_methods = supported_methods
-        self.should_fail = should_fail
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def supported_methods(self) -> List[str]:
-        return self._supported_methods
-
-    def process_payment(self, payment_method: str, amount: float) -> bool:
-        if self.should_fail:
-            raise Exception(f"Method {payment_method} not supported by {self.name}")
-        logging.info(
-            f"[{self.name}] Processing payment of ${amount:.2f} via {payment_method}."
-        )
-        return True
-
-
 def main():
     try:
         # Configuração de provedores e estratégias
         logging.info("Configuring payment providers and strategies.")
 
-        # Provedores para simulação
-        pagseguro = FakeProvider(
-            name="PagSeguro", supported_methods=["pix", "boleto", "credit_card"]
-        )
-        mercado_pago_fail = FakeProvider(
-            name="MercadoPago", supported_methods=["credit_card"], should_fail=True
-        )
-        pagarme_success = FakeProvider(
-            name="PagarMe", supported_methods=["credit_card"]
-        )
-        pagarme_fail = FakeProvider(
-            name="PagarMe", supported_methods=["boleto"], should_fail=True
-        )
-        pagarme_pix_success = FakeProvider(name="PagarMe", supported_methods=["pix"])
-        pagseguro_boleto_fail = FakeProvider(
-            name="PagSeguro", supported_methods=["boleto"], should_fail=True
-        )
-        pagarme_credit_fail = FakeProvider(
-            name="PagarMe", supported_methods=["credit_card"], should_fail=True
-        )
-        pagarme_credit_success = FakeProvider(
-            name="PagarMe", supported_methods=["credit_card"]
-        )
+        # Provedores reais
+        pagseguro = PagSeguroProvider()
+        mercado_pago = MercadoPagoProvider()
+        pagarme = PagarMeProvider()
 
         # Payment strategies
         pix_pagseguro = PixPayment(pagseguro)
-        pix_pagarme = PixPayment(pagarme_pix_success)
-        cartao_mercado_pago = CreditCardPayment(mercado_pago_fail)
-        cartao_pagarme_success = CreditCardPayment(pagarme_success)
-        cartao_pagarme_fail = CreditCardPayment(pagarme_credit_fail)
-        boleto_pagseguro = BoletoPayment(pagseguro_boleto_fail)
-        boleto_pagarme = BoletoPayment(pagarme_success)
+        pix_pagarme = PixPayment(pagarme)
+        cartao_mercado_pago = CreditCardPayment(mercado_pago)
+        cartao_pagarme = CreditCardPayment(pagarme)
+        boleto_pagseguro = BoletoPayment(pagseguro)
+        boleto_pagarme = BoletoPayment(pagarme)
 
         # Configuration of combined payments for each scenario
         combined_payments = []
@@ -85,7 +41,7 @@ def main():
         # Scenario 2: Credit Card fails with fallback to PagarMe
         payment_cc_fallback = CombinedPayment()
         payment_cc_fallback.add_payment(cartao_mercado_pago, proportion=1.0)
-        payment_cc_fallback.add_payment(cartao_pagarme_success, proportion=0.0)
+        payment_cc_fallback.add_payment(cartao_pagarme, proportion=0.0)
         combined_payments.append(payment_cc_fallback)
 
         # Scenario 3: Boleto fails with fallback to PagarMe
@@ -104,15 +60,50 @@ def main():
         payment_pix_two_cc = CombinedPayment()
         payment_pix_two_cc.add_payment(pix_pagseguro, proportion=0.5)
         payment_pix_two_cc.add_payment(cartao_mercado_pago, proportion=0.25)
-        payment_pix_two_cc.add_payment(cartao_pagarme_success, proportion=0.25)
+        payment_pix_two_cc.add_payment(cartao_pagarme, proportion=0.25)
         combined_payments.append(payment_pix_two_cc)
 
         # Scenario 6: Combined PIX, boleto, and credit card
         payment_combined = CombinedPayment()
         payment_combined.add_payment(pix_pagseguro, proportion=0.4)
         payment_combined.add_payment(boleto_pagseguro, proportion=0.4)
-        payment_combined.add_payment(cartao_pagarme_fail, proportion=0.2)
+        payment_combined.add_payment(cartao_pagarme, proportion=0.2)
         combined_payments.append(payment_combined)
+
+        # Scenario 7: Multiple fallbacks for PIX
+        payment_pix_multiple_fallback = CombinedPayment()
+        payment_pix_multiple_fallback.add_payment(pix_pagseguro, proportion=0.5)
+        payment_pix_multiple_fallback.add_payment(pix_pagarme, proportion=0.5)
+        combined_payments.append(payment_pix_multiple_fallback)
+
+        # Scenario 8: Multiple fallbacks for Credit Card
+        payment_cc_multiple_fallback = CombinedPayment()
+        payment_cc_multiple_fallback.add_payment(cartao_mercado_pago, proportion=0.5)
+        payment_cc_multiple_fallback.add_payment(cartao_pagarme, proportion=0.5)
+        combined_payments.append(payment_cc_multiple_fallback)
+
+        # Scenario 9: Multiple fallbacks for Boleto
+        payment_boleto_multiple_fallback = CombinedPayment()
+        payment_boleto_multiple_fallback.add_payment(boleto_pagseguro, proportion=0.5)
+        payment_boleto_multiple_fallback.add_payment(boleto_pagarme, proportion=0.5)
+        combined_payments.append(payment_boleto_multiple_fallback)
+
+        # Scenario 10: Mixed payment methods with fallbacks
+        payment_mixed_fallback = CombinedPayment()
+        payment_mixed_fallback.add_payment(pix_pagseguro, proportion=0.3)
+        payment_mixed_fallback.add_payment(boleto_pagseguro, proportion=0.3)
+        payment_mixed_fallback.add_payment(cartao_mercado_pago, proportion=0.4)
+        combined_payments.append(payment_mixed_fallback)
+
+        # Scenario 11: All methods with multiple fallbacks
+        payment_all_methods_fallback = CombinedPayment()
+        payment_all_methods_fallback.add_payment(pix_pagseguro, proportion=0.2)
+        payment_all_methods_fallback.add_payment(pix_pagarme, proportion=0.2)
+        payment_all_methods_fallback.add_payment(boleto_pagseguro, proportion=0.2)
+        payment_all_methods_fallback.add_payment(boleto_pagarme, proportion=0.2)
+        payment_all_methods_fallback.add_payment(cartao_mercado_pago, proportion=0.1)
+        payment_all_methods_fallback.add_payment(cartao_pagarme, proportion=0.1)
+        combined_payments.append(payment_all_methods_fallback)
 
         # Processing payments for each scenario
         total_amount = 300.00
